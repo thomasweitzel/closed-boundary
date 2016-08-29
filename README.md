@@ -7,7 +7,7 @@ its orientation (clockwise or counterclockwise).
 
 ## License
 
-This software is licensed under the [MIT License](https://opensource.org/licenses/MIT).
+This software is licensed under the [MIT License](LICENSE).
 
 ## Definitions
 
@@ -32,8 +32,8 @@ If at least three nodes are found, the determinant is calculated. The value of t
 translates directly into the orientation of the closed boundary.
 
 It works on a couple of preconditions: the ways have to form a closed boundary which must not have gaps.
-At least three ways are needed to calculate the orientation, and even then it might not be found if the starting
-nodes and ending nodes of the ways are on a straight line (collinear).
+At least four nodes are needed to calculate the orientation, and even then it might not be found if too many
+nodes are on a straight line (collinear).
 
 ## Getting involved
 
