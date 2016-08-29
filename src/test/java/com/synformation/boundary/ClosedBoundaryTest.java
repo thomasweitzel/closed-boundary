@@ -182,4 +182,19 @@ public class ClosedBoundaryTest {
         assertTrue(!closedBoundary.isClockwise() && !closedBoundary.isCounterclockwise());
     }
 
+    @Test
+    public void testBoundarySingleClosedWay() {
+        Set<Way> waySet = new LinkedHashSet<>();
+        waySet.add(new Way(Arrays.asList(new Node("800", 0, 0), new Node("801", 1, 0), new Node("802", 1, 1), new Node("802", 0, 1), new Node("800", 0, 0)))); // 800 -> ... -> 800
+
+        ClosedBoundary closedBoundary = new ClosedBoundary(waySet);
+        assertTrue(closedBoundary.getDeterminant() > 0);
+        assertTrue(closedBoundary.isCounterclockwise());
+
+        // Sanity check: what if we reverse the boundary?
+        ClosedBoundary reversedClosedBoundary = new ClosedBoundary(new HashSet<>(closedBoundary.getReversedWayList()));
+        assertTrue(reversedClosedBoundary.getDeterminant() < 0);
+        assertTrue(reversedClosedBoundary.isClockwise());
+    }
+
 }

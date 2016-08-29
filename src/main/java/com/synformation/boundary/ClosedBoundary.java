@@ -46,8 +46,8 @@ import java.util.stream.Collectors;
  * translates directly into the orientation of the closed boundary.
  *
  * This class works on a couple of preconditions: the ways have to form a closed boundary which must not have gaps.
- * At least three ways are needed to calculate the orientation, and even then it might not be found if the starting
- * nodes and ending nodes of the ways are on a straight line (collinear).
+ * At least four nodes are needed to calculate the orientation, and even then it might not be found if too many
+ * nodes are on a straight line (collinear).
  */
 public class ClosedBoundary {
 
@@ -236,61 +236,68 @@ public class ClosedBoundary {
 
     // Find determinant nodes (in order) for calculating determinant (we need at least three)
     private List<Node> findDetNodes(final List<Way> wayList) {
-        List<Node> unorderedNodeList = new LinkedList<>();
-        unorderedNodeList.add(getSmallestLongitudeStartNode(wayList));
-        unorderedNodeList.add(getBiggestLongitudeStartNode(wayList));
-        unorderedNodeList.add(getSmallestLatitudeStartNode(wayList));
-        unorderedNodeList.add(getBiggestLatitudeStartNode(wayList));
+        // Collect all nodes into one list
+        List<Node> allNodeList = new LinkedList<>();
+        for (Way way : wayList) {
+            allNodeList.addAll(way.getNodes());
+        }
 
-        // Now bring them in order
-        List<Node> orderedNodeList = wayList.stream().filter(way -> unorderedNodeList.contains(way.getStartNode())).map(Way::getStartNode).collect(Collectors.toCollection(LinkedList::new));
+        List<Node> unorderedDetNodeList = new LinkedList<>();
+        unorderedDetNodeList.add(getSmallestLongitudeNode(allNodeList));
+        unorderedDetNodeList.add(getBiggestLongitudeNode(allNodeList));
+        unorderedDetNodeList.add(getSmallestLatitudeNode(allNodeList));
+        unorderedDetNodeList.add(getBiggestLatitudeNode(allNodeList));
 
-        logDetNodes(orderedNodeList);
-        return orderedNodeList;
+        // Order the candidate nodes for the determinant calculation
+        List<Node> orderedDetNodeList = new LinkedList<>();
+        allNodeList.stream().filter(node -> unorderedDetNodeList.contains(node) && !orderedDetNodeList.contains(node)).forEach(orderedDetNodeList::add);
+
+        logDetNodes(orderedDetNodeList);
+        return orderedDetNodeList;
     }
 
     // Id of no node
     private static final String NO_ID = "NO_ID";
 
-    // Get start node with smallest longitude; if there're more than one, pick the one with the smallest latitude
-    private Node getSmallestLongitudeStartNode(final List<Way> wayList) {
+    // Get node with smallest longitude; if there're more than one, pick the one with the smallest latitude
+    private Node getSmallestLongitudeNode(final List<Node> nodeList) {
         Node node = new Node(NO_ID, Double.MAX_VALUE, Double.MAX_VALUE);
-        for (Way way : wayList) {
-            if (way.getStartNode().getLongitude() < node.getLongitude() || (way.getStartNode().getLongitude() == node.getLongitude() && way.getStartNode().getLatitude() < node.getLatitude())) {
-                node = way.getStartNode();
+        for (Node n : nodeList) {
+            if (n.getLongitude() < node.getLongitude() || (n.getLongitude() == node.getLongitude() && n.getLatitude() < node.getLatitude())) {
+                node = n;
             }
         }
         return node;
     }
 
-    // Get start node with biggest longitude; if there're more than one, pick the one with the biggest latitude
-    private Node getBiggestLongitudeStartNode(final List<Way> wayList) {
+    // Get node with biggest longitude; if there're more than one, pick the one with the biggest latitude
+    private Node getBiggestLongitudeNode(final List<Node> nodeList) {
         Node node = new Node(NO_ID, -Double.MAX_VALUE, -Double.MAX_VALUE);
-        for (Way way : wayList) {
-            if (way.getStartNode().getLongitude() > node.getLongitude() || (way.getStartNode().getLongitude() == node.getLongitude() && way.getStartNode().getLatitude() > node.getLatitude())) {
-                node = way.getStartNode();
+        for (Node n : nodeList) {
+            if (n.getLongitude() > node.getLongitude() || (n.getLongitude() == node.getLongitude() && n.getLatitude() > node.getLatitude())) {
+                node = n;
             }
         }
         return node;
     }
 
-    // Get start node with smallest latitude; if there're more than one, pick the one with the biggest longitude
-    private Node getSmallestLatitudeStartNode(final List<Way> wayList) {
+    // Get node with smallest latitude; if there're more than one, pick the one with the biggest longitude
+    private Node getSmallestLatitudeNode(final List<Node> nodeList) {
         Node node = new Node(NO_ID, -Double.MAX_VALUE, Double.MAX_VALUE);
-        for (Way way : wayList) {
-            if (way.getStartNode().getLatitude() < node.getLatitude() || (way.getStartNode().getLatitude() == node.getLatitude() && way.getStartNode().getLongitude() > node.getLongitude())) {
-                node = way.getStartNode();
+        for (Node n : nodeList) {
+            if (n.getLatitude() < node.getLatitude() || (n.getLatitude() == node.getLatitude() && n.getLongitude() > node.getLongitude())) {
+                node = n;
             }
         }
         return node;
     }
 
-    // Get start node with biggest latitude; if there're more than one, pick the one with the smallest longitude
-    private Node getBiggestLatitudeStartNode(final List<Way> wayList) {
+    // Get node with biggest latitude; if there're more than one, pick the one with the smallest longitude
+    private Node getBiggestLatitudeNode(final List<Node> nodeList) {
         Node node = new Node(NO_ID, Double.MAX_VALUE, -Double.MAX_VALUE);
-        for (Way way : wayList) {
-            if (way.getStartNode().getLatitude() > node.getLatitude() || (way.getStartNode().getLatitude() == node.getLatitude() && way.getStartNode().getLongitude() < node.getLongitude())) {
-                node = way.getStartNode();
+        for (Node n : nodeList) {
+            if (n.getLatitude() > node.getLatitude() || (n.getLatitude() == node.getLatitude() && n.getLongitude() < node.getLongitude())) {
+                node = n;
             }
         }
         return node;
