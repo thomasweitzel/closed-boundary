@@ -39,7 +39,7 @@ import static org.junit.Assert.assertTrue;
  * First a set of ways is set up and then passed to the constructor. The building of the closed boundary either fails
  * with an exception (IllegalArgumentException) if the set of ways cannot be used to build a closed boundary, or not.
  *
- * In some cases there might be a warning (Berlin (West) problem) were we have a closed boundary but there're sill ways
+ * In some cases there might be a warning (Berlin (West) problem) were we have a closed boundary but there're still ways
  * left, possibly forming another closed boundary - or more than one.
  */
 public class ClosedBoundaryTest {
@@ -195,6 +195,18 @@ public class ClosedBoundaryTest {
         ClosedBoundary reversedClosedBoundary = new ClosedBoundary(new HashSet<>(closedBoundary.getReversedWayList()));
         assertTrue(reversedClosedBoundary.getDeterminant() < 0);
         assertTrue(reversedClosedBoundary.isClockwise());
+    }
+
+    @Test
+    public void testBoundaryTwoSquares() {
+        // Construct two separate closed boundaries (Berlin (West) problem)
+        Set<Way> waySet = new LinkedHashSet<>();
+        waySet.add(new Way(Arrays.asList(new Node("900", 0, 0), new Node("901", 1, 0), new Node("902", 1, 1), new Node("902", 0, 1), new Node("900", 0, 0)))); // 900 -> ... -> 900
+        waySet.add(new Way(Arrays.asList(new Node("910", 5, 5), new Node("911", 6, 5), new Node("912", 6, 6), new Node("912", 5, 6), new Node("910", 5, 5)))); // 910 -> ... -> 910
+
+        ClosedBoundary closedBoundary = new ClosedBoundary(waySet);
+        assertTrue(closedBoundary.getDeterminant() > 0);
+        assertTrue(closedBoundary.isCounterclockwise());
     }
 
 }
